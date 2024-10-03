@@ -1,23 +1,35 @@
-import express from "express";
-
 import configurations from "@/config";
-import cacheRoutes from "./routes/cache";
-import { monitorMiddleware, metricsRoute } from "./middlewares/monitor";
+import { cacheRoutesHandler } from "./routes/cache";
+// import { monitorMiddleware, metricsRouteHandler } from "./middlewares/monitor";
 
-const app = express();
 const PORT = configurations.port;
 
-// Middleware
-app.use(express.json());
-app.use(monitorMiddleware); // Logging and performance monitoring middleware
+// Create a unified request handler
+async function handler(req: Request): Promise<Response> {
+  const url = new URL(req.url);
 
-// Cache routes
-app.use("/cache", cacheRoutes);
+  // Use the monitorMiddleware for logging and performance monitoring
+  // Apply the monitor middleware
+  // const monitorResponse = await monitorMiddleware(req);
+  // if (monitorResponse) return monitorResponse;
+  // Routes
+  if (url.pathname.startsWith("/cache")) {
+    return cacheRoutesHandler(req);
+  }
+  // if (url.pathname === "/metrics") {
+  //   return metricsRouteHandler(req);
+  // }
+  return new Response("Not Found", { status: 404 });
+}
 
-// Metrics route for Prometheus
-app.get("/metrics", metricsRoute);
-
-// Start server
-app.listen(PORT, () => {
-  console.info(`Cache service running on http://localhost:${PORT}`);
+// Start the Bun server
+Bun.serve({
+  port: PORT,
+  fetch: handler,
+  error: (e) => {
+    console.error(`Error: ${e?.message}`);
+    return new Response("Internal Server Error", { status: 500 });
+  },
 });
+
+console.info(`Cache service running on http://localhost:${PORT}`);
