@@ -38,6 +38,14 @@
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.3.3"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/indrajithc/bun-cache-handler.git"
+  },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/indrajithc/bun-cache-handler/issues"
+  },
+  "homepage": "https://github.com/indrajithc/bun-cache-handler#readme"
 }
