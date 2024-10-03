@@ -1,15 +1,13 @@
-import { Router } from "express";
-import type { Request, Response } from "express"; // Type-only import
 import { CacheHandler } from "../cacheHandler";
 import logger from "../logger";
 
-const router = Router();
+// Cache handler instance
 const cacheHandler = new CacheHandler();
 
 // Define interface for request body
 interface SetCacheRequest {
   key: string;
-  value: unknown; // or a more specific type, if known
+  value: unknown;
   tags?: string[];
 }
 
@@ -17,45 +15,55 @@ interface RevalidateCacheRequest {
   tags: string[];
 }
 
-// Route to get cache entry by key
-router.get("/:key", (req: Request, res: Response) => {
-  const { key } = req.params;
-  const cacheEntry = cacheHandler.get(key);
+// Route handler for Bun
+export async function cacheRoutesHandler(req: Request): Promise<Response> {
+  const url = new URL(req.url);
+  const { method } = req;
 
-  if (cacheEntry) {
-    logger.info(`Cache hit for key: ${key}`);
-    return res.json(cacheEntry);
-  }
-  logger.warn(`Cache miss for key: ${key}`);
-  return res.status(404).json({ error: "Key not found" });
-});
+  // Handle GET request to get cache entry by key
+  if (method === "GET" && url.pathname.startsWith("/cache/")) {
+    const key = url.pathname.split("/cache/")[1];
+    if (!key) return new Response(JSON.stringify({ error: "Key not provided" }), { status: 400 });
 
-// Route to set cache entry
-router.post("/", (req: Request<{}, {}, SetCacheRequest>, res: Response) => {
-  const { key, value, tags } = req.body;
-
-  if (!key || !value) {
-    logger.error("Key and value are required");
-    return res.status(400).json({ error: "Key and value are required" });
+    const cacheEntry = cacheHandler.get(key);
+    if (cacheEntry) {
+      logger.info(`Cache hit for key: ${key}`);
+      return new Response(JSON.stringify(cacheEntry), { status: 200 });
+    }
+    logger.warn(`Cache miss for key: ${key}`);
+    return new Response(JSON.stringify({ error: "Key not found" }), { status: 404 });
   }
 
-  cacheHandler.set(key, value, tags);
-  logger.info(`Cache set for key: ${key}${tags ? ` with tags: ${tags.join(", ")}` : ""}`); // Convert tags array to a string
-  return res.json({ message: "Cache set successfully" });
-});
+  // Handle POST request to set cache entry
+  if (method === "POST" && url.pathname === "/cache") {
+    const body = (await req.json()) as SetCacheRequest;
 
-// Route to revalidate cache by tags
-router.post("/revalidate", (req: Request<{}, {}, RevalidateCacheRequest>, res: Response) => {
-  const { tags } = req.body;
+    const { key, value, tags } = body;
+    if (!key || !value) {
+      logger.error("Key and value are required");
+      return new Response(JSON.stringify({ error: "Key and value are required" }), { status: 400 });
+    }
 
-  if (!tags || !tags.length) {
-    logger.error("Tags are required");
-    return res.status(400).json({ error: "Tags are required" });
+    cacheHandler.set(key, value, tags);
+    logger.info(`Cache set for key: ${key}${tags ? ` with tags: ${tags.join(", ")}` : ""}`);
+    return new Response(JSON.stringify({ message: "Cache set successfully" }), { status: 200 });
   }
 
-  cacheHandler.revalidateTag(tags);
-  logger.info(`Cache revalidated for tags: ${tags.join(", ")}`); // Convert tags array to a string
-  return res.json({ message: "Cache revalidated by tags" });
-});
+  // Handle POST request to revalidate cache by tags
+  if (method === "POST" && url.pathname === "/cache/revalidate") {
+    const body = (await req.json()) as RevalidateCacheRequest;
 
-export default router;
+    const { tags } = body;
+    if (!tags || !tags.length) {
+      logger.error("Tags are required");
+      return new Response(JSON.stringify({ error: "Tags are required" }), { status: 400 });
+    }
+
+    cacheHandler.revalidateTag(tags);
+    logger.info(`Cache revalidated for tags: ${tags.join(", ")}`);
+    return new Response(JSON.stringify({ message: "Cache revalidated by tags" }), { status: 200 });
+  }
+
+  // Fallback for unrecognized routes
+  return new Response(JSON.stringify({ error: "Not Found" }), { status: 404 });
+}
