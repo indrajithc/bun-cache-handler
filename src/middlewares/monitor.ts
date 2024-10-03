@@ -51,7 +51,7 @@ export function monitorMiddleware(req: ExtendedRequest, res: Response, next: Nex
 }
 
 // Metrics endpoint to expose Prometheus metrics
-export function metricsRoute(req: ExtendedRequest, res: Response) {
+export function metricsRoute(_req: ExtendedRequest, res: Response) {
   res.set("Content-Type", register.contentType);
   register
     .metrics()
