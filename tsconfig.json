@@ -1,0 +1,68 @@
+{
+  "compilerOptions": {
+    /* Projects */
+    // "incremental": true,
+    // "composite": true,
+    // "tsBuildInfoFile": "./.tsbuildinfo",
+    // "disableSourceOfProjectReferenceRedirect": true,
+    // "disableSolutionSearching": true,
+    // "disableReferencedProjectLoad": true,
+    /* Language and Environment */
+    "target": "ESNext", /* Use the latest JavaScript features */
+    "lib": [
+      "ESNext"
+    ], /* Allow using ESNext features */
+    "module": "ESNext", /* Use the latest module system */
+    "jsx": "react-jsx", /* Enable React JSX support */
+    "allowJs": true, /* Allow JavaScript files in the project */
+    /* Modules */
+    "moduleDetection": "force", /* Force module detection */
+    "moduleResolution": "bundler", /* Use bundler module resolution */
+    "allowImportingTsExtensions": true, /* Allow importing .ts extensions */
+    "verbatimModuleSyntax": true, /* Keep original module syntax */
+    /* Emit */
+    "noEmit": true, /* Don't emit any output */
+    /* Best Practices */
+    // "strict": true, /* Enable all strict type-checking options */
+    "strict": false, /* Change strict mode to false to relax type checking */
+    "skipLibCheck": true, /* Skip type checking of declaration files */
+    "noFallthroughCasesInSwitch": true, /* Disallow fallthrough cases in switch statements */
+    /* Some Stricter Flags */
+    "noUnusedLocals": true, /* Report unused local variables */
+    "noUnusedParameters": true, /* Report unused function parameters */
+    "noPropertyAccessFromIndexSignature": false, /* Enforce using indexed access for properties */
+    /* Paths */
+    "baseUrl": "./", /* Base directory for resolving non-relative module names */
+    "paths": {
+      "@/*": [
+        "./*"
+      ],
+      "@app/*": [
+        "./src/*"
+      ],
+      "@utils/*": [
+        "./src/utils/*"
+      ],
+      "@functions/*": [
+        "./src/functions/*"
+      ],
+      "@view/*": [
+        "./src/view/*"
+      ],
+      "@lib/*": [
+        "./src/lib/*"
+      ]
+    } /* Specify a set of entries that re-map imports to additional lookup locations */
+  },
+  "ts-node": {
+    "require": [
+      "tsconfig-paths/register"
+    ]
+  },
+  "exclude": [
+    "node_modules",
+    "build",
+    "dist",
+    "**/*.js"
+  ]
+}
